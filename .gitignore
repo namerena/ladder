@@ -9,6 +9,8 @@ node_modules
 build
 /dist
 /src/**/*.js
+/server/**/*.js
+/web/**/*.js
 /test/**/*.js
 /example/**/*.js
 *.map
