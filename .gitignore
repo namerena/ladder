@@ -17,3 +17,4 @@ build
 /temp
 /example/**/*.ticlo
 /yarn-error.log
+/server/lib/namerenaRun.dart.js

@@ -1,33 +1,55 @@
 export class Battle {
-  clan0: string;
-  clan1: string;
-  names0: string;
-  names1: string;
   winner: string;
-  time: number;
+
+  constructor(public group0: Group, public group1: Group, public time: number) {}
 }
 
 export class Group {
-  names: string[];
-
   score: number;
-  level: number;
-
-  highestLevel: number;
-  highestLevelTime: number;
-  password: string;
+  rank: number;
 
   history: Map<number, Battle> = new Map<number, Battle>();
+  names: string;
 
   constructor(public user: User) {}
+
+  save() {
+    return {
+      names: this.names,
+    };
+  }
+  load(data: any) {
+    this.names = data.names;
+  }
 }
 
 export class User {
-  clanName: string;
   lastChangeTime: number;
-  group5 = new Group(this);
+  password: string;
+
+  groups = {'5': new Group(this)};
+
+  constructor(public clanName: string) {}
+
+  load(data: any) {
+    this.clanName = data.clanName;
+    this.password = data.password;
+    this.lastChangeTime = data.lastChangeTime;
+    this.groups['5'].load(data['5']);
+  }
+
+  save() {
+    return {
+      clanName: this.clanName,
+      password: this.password,
+      lastChangeTime: this.lastChangeTime,
+      5: this.groups['5'].save(),
+    };
+  }
 }
 
 export class Game {
   groups: Group[];
+
+  save() {}
 }

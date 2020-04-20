@@ -1,55 +1,51 @@
-import Fs from "fs";
-import Path from "path";
+import Fs from 'fs';
+import Path from 'path';
 
 class JobIOTask {
-  current?: "write" | "delete";
-  next?: "write" | "delete";
+  current?: 'write' | 'delete';
+  next?: 'write' | 'delete';
   nextData: string;
 
-  constructor(
-    public loader: FileStorage,
-    public name: string,
-    public path: string
-  ) {}
+  constructor(public loader: FileStorage, public name: string, public path: string) {}
 
   write(data: string) {
     if (this.next || this.current) {
-      this.next = "write";
+      this.next = 'write';
       this.nextData = data;
     } else {
-      this.current = "write";
+      this.current = 'write';
       Fs.writeFile(this.path, data, this.onDone);
     }
   }
 
   delete() {
     if (this.next) {
-      if (this.next !== "delete") {
-        this.next = "delete";
+      if (this.next !== 'delete') {
+        this.next = 'delete';
         this.nextData = null;
       }
     } else if (this.current) {
-      if (this.current !== "delete") {
-        this.next = "delete";
+      if (this.current !== 'delete') {
+        this.next = 'delete';
         this.nextData = null;
       }
     } else {
-      this.current = "delete";
+      this.current = 'delete';
       Fs.unlink(this.path, this.onDone);
     }
   }
 
   onDone = () => {
     if (this.next) {
-      let { next, nextData } = this;
+      let {next, nextData} = this;
       this.next = null;
       this.nextData = null;
       this.current = null;
       switch (next) {
-        case "delete":
+        case 'delete':
           this.delete();
           return;
-        case "write":
+        case 'write':
           this.write(nextData);
           return;
       }
@@ -91,13 +87,10 @@ export class FileStorage {
   init(): Map<string, string> {
     let result = new Map<string, string>();
     for (let file of Fs.readdirSync(this.dir)) {
-      if (file.endsWith(".json")) {
-        let name = file.substring(0, file.length - ".json".length);
+      if (file.endsWith('.json')) {
+        let name = file.substring(0, file.length - '.json'.length);
         try {
-          result.set(
-            name,
-            Fs.readFileSync(Path.join(this.dir, `${name}.json`), "utf8")
-          );
+          result.set(name, Fs.readFileSync(Path.join(this.dir, `${name}.json`), 'utf8'));
         } catch (err) {
           // TODO Logger
         }
