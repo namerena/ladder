@@ -1,5 +1,7 @@
 import {Game, User} from './Game';
 import {FileStorage} from './Storage';
+import {getUTC8Str, TenMinutes} from './util';
+import {roundRun} from './Runner';
 
 type TEAM = '1' | '2' | '5';
 let TEAMS: TEAM[] = ['1', '2', '5'];
@@ -64,4 +66,36 @@ export class Server {
     }
     this.mainStorage.saveFile(`@${team}`, JSON.stringify(result));
   }
+
+  start(delay: number = -1) {
+    if (delay < 0) {
+      let now = new Date().getTime();
+      let nextTs = Math.ceil((now + 1) / TenMinutes) * TenMinutes;
+      delay = nextTs - now;
+    }
+
+    setTimeout(this.nextRound, delay);
+  }
+
+  nextRound = async () => {
+    let startTime = new Date().getTime();
+    let startTstr = getUTC8Str(startTime);
+    let roundsIdx = Math.round(startTime / TenMinutes);
+    let team: TEAM = TEAMS[roundsIdx % 3];
+    try {
+      await roundRun(this.games[team], startTime, startTstr);
+      this.sortGame(team);
+      this.saveScores(team);
+    } catch (e) {
+      console.log(e);
+    }
+
+    let endTime = new Date().getTime();
+    console.log(`${startTstr} : ${team}人组对战，持续${(endTime - startTime) / 1000}秒`);
+    if (endTime - startTime >= TenMinutes) {
+      this.start(0);
+    } else {
+      this.start();
+    }
+  };
 }

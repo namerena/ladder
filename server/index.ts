@@ -2,17 +2,17 @@ import Express from 'express';
 import {roundRun} from './lib/Runner';
 import {Server} from './lib/Server';
 import {FileStorage} from './lib/Storage';
+import Cors from 'cors';
 
 async function main() {
   let mainStorage = new FileStorage('./storage');
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
-  await roundRun(server.games['5'], Math.round(Math.random() * 1000000000));
-  server.sortGame('5');
 
-  server.saveScores('5');
+  server.start();
 
   let app = Express();
+  app.use(Cors());
 
   // first 100 of one team size
   app.get('/index', (req, res) => {
@@ -33,7 +33,6 @@ async function main() {
   app.get('/history', (req, res) => {
     res.send('hello');
   });
-
 
   app.listen(80);
 

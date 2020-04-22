@@ -1,11 +1,7 @@
 import {Battle, Game, Group} from './Game';
-import {waitImmediate} from './util';
+import {TenMinutes, ThirtyDays, waitImmediate} from './util';
 
-const ThirtyDays = 30 * 24 * 60 * 60 * 1000;
-
-export async function roundRun(game: Game, time: number) {
-  let tsUTC8 = Math.round(new Date().getTime() / 600000) * 600000 + 8 * 3600000;
-  let tstr = new Date(tsUTC8).toISOString().substring(0, 19);
+export async function roundRun(game: Game, time: number, tstr: string) {
   let groups: Group[] = [...game.groups];
   let len = groups.length;
   let battles = new Map<number, Map<number, Battle>>();
