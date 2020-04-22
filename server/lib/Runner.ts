@@ -1,12 +1,12 @@
 import {Battle, Game, Group} from './Game';
-const namerena = require('./namerenaRun.dart.js');
+import {waitImmediate} from './util';
 
 const ThirtyDays = 30 * 24 * 60 * 60 * 1000;
 
-async function run(game: Game, time: number) {
-  let tsUTC8 = Math.round(new Date().getTime() / 1800000) * 1800000 + 8 * 3600000;
-  let seed = `seed:${new Date(tsUTC8).toISOString().substring(0, 19)}@!`;
-  let groups: Group[] = [...this.game.groups];
+export async function roundRun(game: Game, time: number) {
+  let tsUTC8 = Math.round(new Date().getTime() / 600000) * 600000 + 8 * 3600000;
+  let tstr = new Date(tsUTC8).toISOString().substring(0, 19);
+  let groups: Group[] = [...game.groups];
   let len = groups.length;
   let battles = new Map<number, Map<number, Battle>>();
   for (let i = 0; i < len; ++i) {
@@ -24,9 +24,9 @@ async function run(game: Game, time: number) {
     if (y >= 0 && y < len && x !== y) {
       let b = getBattle(x, y);
       if (!b) {
-        let b = new Battle(groups[x], groups[y], time);
-        let winners: string[] = namerena.run(`${b.group0.names}\n\n${b.group1.names}\n\n${seed}`);
-        b.winner = winners[0].split('@').pop();
+        let b = new Battle(groups[x], groups[y], tstr, time);
+        b.run();
+        setBattle(x, y, b);
       }
       return b;
     }
@@ -38,7 +38,7 @@ async function run(game: Game, time: number) {
     let group = groups[i];
     let user = group.user;
     if (time - user.lastChangeTime > ThirtyDays) {
-      // not logged in for more than 30 days, assign less battle
+      // 最近一次改名超过30天。减少对战次数
       await createBattle(i, i - 1);
       await createBattle(i, i + 1);
     } else {
@@ -51,8 +51,10 @@ async function run(game: Game, time: number) {
       await createBattle(i, i + 3);
       await createBattle(i, i + 4);
     }
+    // 防止锁死进程，允许http服务器返回数据
+    await waitImmediate();
   }
-  // count score
+  // 计算积分
   for (let i = 0; i < len; ++i) {
     let group = groups[i];
     let clanName = group.user.clanName;
@@ -70,7 +72,7 @@ async function run(game: Game, time: number) {
       // bonus battle
       while (j >= 0) {
         let battle = await createBattle(i, j);
-        if (battle !== null && battle.winner === clanName) {
+        if (battle != null && battle.winner === clanName) {
           group.score += len + 16 - j;
           j -= 8;
         } else {

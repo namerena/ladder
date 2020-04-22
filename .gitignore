@@ -20,3 +20,5 @@ build
 /example/**/*.ticlo
 /yarn-error.log
 /server/lib/namerenaRun.dart.js
+/storage
+/log

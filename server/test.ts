@@ -1,4 +1,6 @@
-let data = {
+import {FileStorage} from './lib/Storage';
+
+let data: any = {
   飞马座: ['π7491星', 'θ2635星', 'ε1619星', 'δ9141星', 'ς2861星'],
   仙女座: ['η2053星', 'δ6989星', 'γ5372星', 'ι1613星', 'ο3886星'],
   天龙座: ['υ6307星', 'ς6972星', 'ε2254星', 'β1301星', 'μ6052星'],
@@ -88,3 +90,23 @@ let data = {
   飞鱼座: ['ς606星', 'θ434星', 'β958星', 'μ546星', 'δ740星'],
   狐狸座: ['δ919星', 'ξ598星', 'ψ578星', 'ζ063星', 'χ005星'],
 };
+let mainStorage = new FileStorage('./storage');
+let lastChangeTime = new Date().getTime();
+for (let key in data) {
+  let names: string[] = data[key];
+  names = names.map((str) => ` ${str}`);
+  let toSave = {
+    'clanName': key,
+    lastChangeTime,
+    '5': {
+      names: names.join('\n'),
+    },
+    '2': {
+      names: `${names[1]}\n${names[2]}`,
+    },
+    '1': {
+      names: names[0],
+    },
+  };
+  mainStorage.saveFile(key, JSON.stringify(toSave));
+}
