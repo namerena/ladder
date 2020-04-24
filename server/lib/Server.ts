@@ -4,9 +4,10 @@ import {FileStorage} from './Storage';
 import {getUTC8Str, TenMinutes} from './util';
 import {roundRun} from './Runner';
 import {validateNameChange} from './validator';
+import * as zlib from 'zlib';
 
 type TEAM = '1' | '2' | '5';
-let TEAMS: TEAM[] = ['1', '2', '5'];
+export const TEAMS: TEAM[] = ['1', '2', '5'];
 
 export class Server {
   users = new Map<string, User>();
@@ -93,7 +94,7 @@ export class Server {
     }
 
     let endTime = new Date().getTime();
-    console.log(`${startTstr} : ${team}人组对战${Battle.counter}场，持续${(endTime - startTime) / 1000}秒`);
+    this.updateIndexPage(`${startTstr} : ${team}人组对战${Battle.counter}场，持续${(endTime - startTime) / 1000}秒`);
     Battle.counter = 0;
     if (endTime - startTime >= TenMinutes) {
       this.start(0);
@@ -102,8 +103,28 @@ export class Server {
     }
   };
 
-  indexPage: string = '{}';
-  updateIndexPage() {}
+  indexPage: Buffer;
+  updateIndexPage(lastMessage: string) {
+    let result: any = {lastMessage};
+    for (let t of TEAMS) {
+      let groups = this.games[t].groups;
+      let topN = Math.min(groups.length, 100);
+      let teams: any[] = [];
+      for (let i = 0; i < topN; ++i) {
+        let group = groups[i];
+        teams.push({
+          c: group.user.clanName,
+          n: group.names,
+          s: Math.round(group.score),
+        });
+      }
+      result[t] = teams;
+    }
+    const buf = new Buffer(JSON.stringify(result), 'utf-8'); // Choose encoding for the string.
+    zlib.gzip(buf, (_: Error, result: Buffer) => {
+      this.indexPage = result;
+    });
+  }
 
   updateUser(data: any) {
     let {clanName, names, password} = validateNameChange(data);
@@ -140,4 +161,10 @@ export class Server {
     this.mainStorage.saveFile(clanName, JSON.stringify(user.save()));
     return '';
   }
+
+  getUser(clanName: string): string {
+    let result: any = {
+    };
+  }
+  getUserHistory(clanName: string, team: TEAM): string {}
 }

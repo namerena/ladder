@@ -1,5 +1,6 @@
 import Fs from 'fs';
 import Path from 'path';
+const steno = require('steno');
 
 class JobIOTask {
   current?: 'write' | 'delete';
@@ -14,7 +15,8 @@ class JobIOTask {
       this.nextData = data;
     } else {
       this.current = 'write';
-      Fs.writeFile(this.path, data, this.onDone);
+      // fs.writeFile(this.path, data, this.onDone);
+      steno.writeFile(this.path, data, this.onDone);
     }
   }
 
@@ -58,11 +60,11 @@ class JobIOTask {
 export class FileStorage {
   tasks: Map<string, JobIOTask> = new Map();
 
-  getTask(name: string) {
+  getTask(name: string, ext = '.json') {
     if (this.tasks.has(name)) {
       return this.tasks.get(name);
     } else {
-      let task = new JobIOTask(this, name, Path.join(this.dir, `${name}.json`));
+      let task = new JobIOTask(this, name, Path.join(this.dir, `${name}${ext}`));
       this.tasks.set(name, task);
       return task;
     }
@@ -84,13 +86,13 @@ export class FileStorage {
   saveFile(name: string, str: string) {
     this.getTask(name).write(str);
   }
-  init(): Map<string, string> {
+  init(ext = '.json'): Map<string, string> {
     let result = new Map<string, string>();
     for (let file of Fs.readdirSync(this.dir)) {
-      if (file.endsWith('.json')) {
-        let name = file.substring(0, file.length - '.json'.length);
+      if (file.endsWith(ext)) {
+        let name = file.substring(0, file.length - ext.length);
         try {
-          result.set(name, Fs.readFileSync(Path.join(this.dir, `${name}.json`), 'utf8'));
+          result.set(name, Fs.readFileSync(Path.join(this.dir, `${name}${ext}`), 'utf8'));
         } catch (err) {
           // TODO Logger
         }
