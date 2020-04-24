@@ -1,7 +1,9 @@
-import {Game, User} from './Game';
+import crypto from 'crypto';
+import {Battle, Game, User} from './Game';
 import {FileStorage} from './Storage';
 import {getUTC8Str, TenMinutes} from './util';
 import {roundRun} from './Runner';
+import {validateNameChange} from './validator';
 
 type TEAM = '1' | '2' | '5';
 let TEAMS: TEAM[] = ['1', '2', '5'];
@@ -91,11 +93,51 @@ export class Server {
     }
 
     let endTime = new Date().getTime();
-    console.log(`${startTstr} : ${team}人组对战，持续${(endTime - startTime) / 1000}秒`);
+    console.log(`${startTstr} : ${team}人组对战${Battle.counter}场，持续${(endTime - startTime) / 1000}秒`);
+    Battle.counter = 0;
     if (endTime - startTime >= TenMinutes) {
       this.start(0);
     } else {
       this.start();
     }
   };
+
+  indexPage: string = '{}';
+  updateIndexPage() {}
+
+  updateUser(data: any) {
+    let {clanName, names, password} = validateNameChange(data);
+    if (clanName == null || names.length < 5) {
+      return '非法输入';
+    }
+    password = crypto.createHash('sha256').update(password, 'utf8').digest('base64');
+    let duplicate = new Set(names).size < 8;
+    let user = this.users.get(clanName);
+    if (user) {
+      if (user.password !== password) {
+        if (!user.password) {
+          user.password = password;
+        } else {
+          return '非法输入';
+        }
+      }
+    } else {
+      user = new User(clanName);
+      user.password = password;
+      this.users.set(clanName, user);
+      for (let t of TEAMS) {
+        user.groups[t].rank = this.users.size - 1;
+        this.games[t].groups.push(user.groups[t]);
+      }
+    }
+
+    user.changes++;
+    user.lastChangeTime = new Date().getTime();
+    user.duplicate = duplicate;
+    user.groups['1'].names = names[0];
+    user.groups['2'].names = `${names[1]}\n${names[2]}`;
+    user.groups['5'].names = names.slice(names.length - 5).join('\n');
+    this.mainStorage.saveFile(clanName, JSON.stringify(user.save()));
+    return '';
+  }
 }

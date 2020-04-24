@@ -3,16 +3,18 @@ import {roundRun} from './lib/Runner';
 import {Server} from './lib/Server';
 import {FileStorage} from './lib/Storage';
 import Cors from 'cors';
+import bodyParser from 'body-parser';
 
 async function main() {
   let mainStorage = new FileStorage('./storage');
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
-
+  server.updateIndexPage();
   server.start();
 
   let app = Express();
   app.use(Cors());
+  app.use(bodyParser.json());
 
   // first 100 of one team size
   app.get('/index', (req, res) => {
@@ -20,8 +22,8 @@ async function main() {
   });
 
   // update one user
-  app.get('/update', (req, res) => {
-    res.send('hello');
+  app.post('/update', (req, res) => {
+    res.send(server.updateUser(req.body));
   });
 
   // get info of one user, with neighbor members at each size

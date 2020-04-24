@@ -1,8 +1,9 @@
-import {Battle, Game, Group} from './Game';
+import {Battle, Game, Group, GroupSnapshot} from './Game';
 import {TenMinutes, ThirtyDays, waitImmediate} from './util';
 
 export async function roundRun(game: Game, time: number, tstr: string) {
-  let groups: Group[] = [...game.groups];
+  let groups: GroupSnapshot[] = game.groups.map((g: Group) => new GroupSnapshot(g, tstr));
+
   let len = groups.length;
   let battles = new Map<number, Map<number, Battle>>();
   for (let i = 0; i < len; ++i) {
@@ -20,7 +21,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     if (y >= 0 && y < len && x !== y) {
       let b = getBattle(x, y);
       if (!b) {
-        let b = new Battle(groups[x], groups[y], tstr, time);
+        let b = new Battle(groups[x], groups[y], tstr);
         b.run();
         setBattle(x, y, b);
       }
@@ -42,10 +43,17 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       await createBattle(i, i - 2);
       await createBattle(i, i - 3);
       await createBattle(i, i - 4);
-      await createBattle(i, i + 1);
-      await createBattle(i, i + 2);
-      await createBattle(i, i + 3);
-      await createBattle(i, i + 4);
+      if ((await createBattle(i, i + 4)) == null) {
+        // 使新注册选手得到更多战斗机会
+        await createBattle(i, i - 5);
+        await createBattle(i, i - 6);
+        await createBattle(i, i - 7);
+        await createBattle(i, i - 8);
+      } else {
+        await createBattle(i, i + 1);
+        await createBattle(i, i + 2);
+        await createBattle(i, i + 3);
+      }
     }
     // 防止锁死进程，允许http服务器返回数据
     await waitImmediate();
@@ -55,21 +63,35 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     let group = groups[i];
     let clanName = group.user.clanName;
     let encounters = battles.get(i);
-    group.score *= (128 - encounters.size) / 128;
+
     let winCount = 0;
+    let meetUp = 0;
+    let meetDown = 0;
     for (let [j, battle] of encounters) {
+      if (j < i) {
+        meetUp++;
+      } else {
+        meetDown++;
+      }
       if (battle.winner === clanName) {
-        group.score += len + 16 - j;
+        group.origin.score += len + 16 - j;
         ++winCount;
       }
     }
+    let encounterSize = encounters.size;
+    if (meetDown > meetUp) {
+      // 若和低排名对手对战太多，那么自动补充50%胜率的虚拟高排名对战，防止冠军积分过快增长
+      encounterSize += (meetDown - meetUp) / 2;
+    }
+    group.origin.score *= (128 - encounterSize) / 128;
+
     if (winCount > 6) {
       let j = i - 8;
       // bonus battle
       while (j >= 0) {
         let battle = await createBattle(i, j);
         if (battle != null && battle.winner === clanName) {
-          group.score += len + 16 - j;
+          group.origin.score += len + 16 - j;
           j -= 8;
         } else {
           break;
