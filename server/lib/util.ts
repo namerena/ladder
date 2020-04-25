@@ -10,5 +10,5 @@ export function getUTC8Str(time: number) {
 }
 
 export const TenMinutes = 10 * 60 * 1000;
-
-export const ThirtyDays = 30 * 24 * 60 * 60 * 1000;
+export const OneDay = 24 * 60 * 60 * 1000;
+export const ThirtyDays = 30 * OneDay;

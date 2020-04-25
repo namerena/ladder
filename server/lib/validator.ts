@@ -19,21 +19,21 @@ function tooLong(str: string) {
   return false;
 }
 
-export function validateNameChange(data: any): {clanName?: string; names?: string[]; password?: string} {
+export function validateNameChange(data: any): {clan?: string; names?: string[]; password?: string} {
   if (!data || data.constructor !== Object) {
     return {};
   }
-  let {names: namestr, clanName, password} = data;
+  let {names: namestr, clan, password} = data;
   if (
     typeof namestr !== 'string' ||
-    typeof clanName !== 'string' ||
+    typeof clan !== 'string' ||
     typeof password !== 'string' ||
     password.length < 2
   ) {
     return {};
   }
-  clanName = clanName.trim();
-  if (clanName.length === 0 || invalidClanChar.test(clanName) || clanName === '!' || tooLong(clanName)) {
+  clan = clan.trim();
+  if (clan.length === 0 || invalidClanChar.test(clan) || clan === '!' || tooLong(clan)) {
     return {};
   }
   let names = namestr.split('\n');
@@ -47,5 +47,5 @@ export function validateNameChange(data: any): {clanName?: string; names?: strin
   // 名字加上空格前缀，方便战队编组
   names = names.map((name: string) => ` ${name}`);
 
-  return {clanName, names, password};
+  return {clan, names, password};
 }

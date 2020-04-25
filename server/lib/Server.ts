@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import {Battle, Game, User} from './Game';
+import {Battle, Game, GroupSnapshot, User} from './Game';
 import {FileStorage} from './Storage';
 import {getUTC8Str, TenMinutes} from './util';
 import {roundRun} from './Runner';
@@ -65,7 +65,7 @@ export class Server {
     let result: any = {};
     for (let i = 0; i < groups.length; ++i) {
       let group = groups[i];
-      result[group.user.clanName] = group.score;
+      result[group.user.clan] = group.score;
     }
     this.mainStorage.saveFile(`@${team}`, JSON.stringify(result));
   }
@@ -103,6 +103,10 @@ export class Server {
     }
   };
 
+  log(str: string) {
+    console.log(str);
+  }
+
   indexPage: Buffer;
   updateIndexPage(lastMessage: string) {
     let result: any = {lastMessage};
@@ -113,27 +117,28 @@ export class Server {
       for (let i = 0; i < topN; ++i) {
         let group = groups[i];
         teams.push({
-          c: group.user.clanName,
+          c: group.user.clan,
           n: group.names,
           s: Math.round(group.score),
         });
       }
       result[t] = teams;
     }
-    const buf = new Buffer(JSON.stringify(result), 'utf-8'); // Choose encoding for the string.
+    const buf = Buffer.from(JSON.stringify(result), 'utf-8'); // Choose encoding for the string.
     zlib.gzip(buf, (_: Error, result: Buffer) => {
       this.indexPage = result;
     });
+    this.log(lastMessage);
   }
 
   updateUser(data: any) {
-    let {clanName, names, password} = validateNameChange(data);
-    if (clanName == null || names.length < 5) {
+    let {clan, names, password} = validateNameChange(data);
+    if (clan == null || names.length < 5) {
       return '非法输入';
     }
     password = crypto.createHash('sha256').update(password, 'utf8').digest('base64');
     let duplicate = new Set(names).size < 8;
-    let user = this.users.get(clanName);
+    let user = this.users.get(clan);
     if (user) {
       if (user.password !== password) {
         if (!user.password) {
@@ -143,9 +148,9 @@ export class Server {
         }
       }
     } else {
-      user = new User(clanName);
+      user = new User(clan);
       user.password = password;
-      this.users.set(clanName, user);
+      this.users.set(clan, user);
       for (let t of TEAMS) {
         user.groups[t].rank = this.users.size - 1;
         this.games[t].groups.push(user.groups[t]);
@@ -158,13 +163,56 @@ export class Server {
     user.groups['1'].names = names[0];
     user.groups['2'].names = `${names[1]}\n${names[2]}`;
     user.groups['5'].names = names.slice(names.length - 5).join('\n');
-    this.mainStorage.saveFile(clanName, JSON.stringify(user.save()));
+    this.mainStorage.saveFile(clan, JSON.stringify(user.save()));
     return '';
   }
 
-  getUser(clanName: string): string {
-    let result: any = {
-    };
+  getUser(clan: string) {
+    let user = this.users.get(clan);
+    if (user) {
+      let result: any = {clan, lastChangeTime: user.lastChangeTime, changes: user.changes};
+      for (let t of TEAMS) {
+        let group = user.groups[t];
+        let ranks: any[] = [];
+        let tdata: any = {names: group.names, score: group.score, ranks};
+        let rank = group.rank;
+        let r0 = Math.max(rank - 5, 0);
+        let r1 = Math.min(rank + 5, this.games[t].groups.length - 1);
+        for (let i = r0; i <= r1; ++i) {
+          ranks.push([i, this.games[t].groups[i].user.clan]);
+        }
+        result[t] = tdata;
+      }
+      return result;
+    }
+    return '';
   }
-  getUserHistory(clanName: string, team: TEAM): string {}
+  getUserHistory(clan: string, team: TEAM) {
+    let user = this.users.get(clan);
+    if (user) {
+      let group = user.groups[team];
+      let result: any = {clan};
+      for (let [key, snapshot] of group.history) {
+        let battles: any[] = [];
+        let snapshotData = {names: snapshot.names, rank: snapshot.rank, battles};
+        for (let battle of snapshot.battles) {
+          let battleData: any = {};
+          let targetGroup: GroupSnapshot;
+          if (battle.group0 === snapshot) {
+            targetGroup = battle.group1;
+          } else {
+            targetGroup = battle.group0;
+          }
+          battleData.clan = targetGroup.clan;
+          battleData.names = targetGroup.names;
+          battleData.rank = targetGroup.rank;
+          battleData.win = battle.winner === clan;
+          battles.push(battleData);
+        }
+        result[key] = snapshotData;
+      }
+      return result;
+    }
+    return {};
+  }
 }

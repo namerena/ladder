@@ -1,3 +1,5 @@
+import {OneDay, ThirtyDays} from './util';
+
 const namerena = require('./namerenaRun.dart.js');
 
 export class Battle {
@@ -10,12 +12,12 @@ export class Battle {
   }
 
   run() {
-    let names = `${this.group0.clanName}\n${this.group0.names}\n\n${this.group1.clanName}\n${this.group1.names}\n\nseed:${this.tstr}@!`;
+    let names = `${this.group0.clan}\n${this.group0.names}\n\n${this.group1.clan}\n${this.group1.names}\n\nseed:${this.tstr}@!`;
     let winner = namerena.run(names);
     if (winner === 0) {
-      this.winner = this.group0.clanName;
+      this.winner = this.group0.clan;
     } else {
-      this.winner = this.group1.clanName;
+      this.winner = this.group1.clan;
     }
     ++Battle.counter;
   }
@@ -39,21 +41,33 @@ export class Group {
   load(data: any) {
     this.names = data.names;
   }
+
+  addHistory(tstr: string, snapshot: GroupSnapshot) {
+    if (this.history.size > 52) {
+      let yesterday = new Date(new Date(tstr + 'Z').getTime() - OneDay).toISOString().substring(0, 19);
+      for (let [t, g] of this.history) {
+        if (t <= yesterday) {
+          this.history.delete(t);
+        }
+      }
+    }
+    this.history.set(tstr, snapshot);
+  }
 }
 
 export class GroupSnapshot {
   rank: number;
-  clanName: string;
+  clan: string;
   names: string;
   user: User;
 
   battles: Set<Battle> = new Set<Battle>();
   constructor(public origin: Group, tstr: string) {
     this.user = origin.user;
-    this.clanName = origin.user.clanName;
+    this.clan = origin.user.clan;
     this.rank = origin.rank;
     this.names = origin.names;
-    origin.history.set(tstr, this);
+    origin.addHistory(tstr, this);
   }
 }
 
@@ -65,7 +79,7 @@ export class User {
 
   groups = {'1': new Group(this), '2': new Group(this), '5': new Group(this)};
 
-  constructor(public clanName: string) {}
+  constructor(public clan: string) {}
 
   load(data: any) {
     this.password = data.password;

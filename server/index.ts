@@ -10,7 +10,7 @@ async function main() {
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
   server.updateIndexPage('');
-  server.start();
+  server.start(0);
 
   let app = Express();
   app.use(Cors());

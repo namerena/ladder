@@ -61,7 +61,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   // 计算积分
   for (let i = 0; i < len; ++i) {
     let group = groups[i];
-    let clanName = group.user.clanName;
+    let clan = group.user.clan;
     let encounters = battles.get(i);
 
     let winCount = 0;
@@ -73,7 +73,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       } else {
         meetDown++;
       }
-      if (battle.winner === clanName) {
+      if (battle.winner === clan) {
         group.origin.score += len + 16 - j;
         ++winCount;
       }
@@ -90,7 +90,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       // bonus battle
       while (j >= 0) {
         let battle = await createBattle(i, j);
-        if (battle != null && battle.winner === clanName) {
+        if (battle != null && battle.winner === clan) {
           group.origin.score += len + 16 - j;
           j -= 8;
         } else {

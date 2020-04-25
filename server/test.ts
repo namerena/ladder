@@ -96,7 +96,7 @@ for (let key in data) {
   let names: string[] = data[key];
   names = names.map((str) => ` ${str}`);
   let toSave = {
-    'clanName': key,
+    'clan': key,
     lastChangeTime,
     '5': {
       names: names.join('\n'),
