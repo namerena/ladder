@@ -1,16 +1,17 @@
 import Express from 'express';
 import {roundRun} from './lib/Runner';
-import {Server, TEAMS} from './lib/Server';
+import {Server} from './lib/Server';
 import {FileStorage} from './lib/Storage';
 import Cors from 'cors';
 import bodyParser from 'body-parser';
+import {TEAMS} from './lib/util';
 
 async function main() {
   let mainStorage = new FileStorage('./storage');
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
   server.updateIndexPage('');
-  server.start(0);
+  server.start();
 
   let app = Express();
   app.use(Cors());

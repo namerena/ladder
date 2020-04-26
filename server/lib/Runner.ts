@@ -44,7 +44,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       await createBattle(i, i - 3);
       await createBattle(i, i - 4);
       if ((await createBattle(i, i + 4)) == null) {
-        // 使新注册选手得到更多战斗机会
+        // 使排名最后的新注册选手得到更多战斗机会
         await createBattle(i, i - 5);
         await createBattle(i, i - 6);
         await createBattle(i, i - 7);
@@ -83,11 +83,12 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       // 若和低排名对手对战太多，那么自动补充50%胜率的虚拟高排名对战，防止冠军积分过快增长
       encounterSize += (meetDown - meetUp) / 2;
     }
-    group.origin.score *= (128 - encounterSize) / 128;
+    // 每回合积分减少，
+    group.origin.score *= (256 - encounterSize) / 256;
 
-    if (winCount > 6) {
+    if (winCount > 6 && group.rank > 100) {
       let j = i - 8;
-      // bonus battle
+      // 100名一下如果连胜可以持续得到加分
       while (j >= 0) {
         let battle = await createBattle(i, j);
         if (battle != null && battle.winner === clan) {

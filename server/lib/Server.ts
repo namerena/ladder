@@ -1,13 +1,10 @@
 import crypto from 'crypto';
 import {Battle, Game, GroupSnapshot, User} from './Game';
 import {FileStorage} from './Storage';
-import {getUTC8Str, TenMinutes} from './util';
+import {getUTC8Str, TEAM, TEAMS, TenMinutes} from './util';
 import {roundRun} from './Runner';
 import {validateNameChange} from './validator';
 import * as zlib from 'zlib';
-
-type TEAM = '1' | '2' | '5';
-export const TEAMS: TEAM[] = ['1', '2', '5'];
 
 export class Server {
   users = new Map<string, User>();
