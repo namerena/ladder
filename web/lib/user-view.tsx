@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Axios from 'axios';
-import {Alert, Card, Input, Spin} from 'antd';
+import {Alert, Button, Card, Input, Spin} from 'antd';
 import {ChangeEvent} from 'react';
 import {getUTC8Str, TEAM} from '../../server/lib/util';
 import {RankButton} from './shared';
@@ -14,8 +14,6 @@ interface State {
   searchFromProp?: string;
   searching: string;
   searched?: string;
-  data?: any;
-  error?: string;
 }
 const gridStyle: React.CSSProperties = {
   width: '50%',
@@ -41,8 +39,12 @@ export class UserView extends React.PureComponent<Props, State> {
     let {searching} = this.state;
     this.setState({searched: searching});
   };
+  onReload = () => {
+    this.searchResult.clear();
+    this.forceUpdate();
+  };
 
-  cachedSearch: string = '';
+  searchResult = new Map<string, any>();
   render(): React.ReactNode {
     let {searching, searched} = this.state;
     return (
@@ -50,24 +52,28 @@ export class UserView extends React.PureComponent<Props, State> {
         <div className="horizontal margin-v">
           查询战队：
           <Input value={searching} onChange={this.onSearchChange} onPressEnter={this.onSearch} />
+          <Button onClick={this.onReload}>刷新</Button>
         </div>
         {this.renderResult()}
       </div>
     );
   }
   renderResult() {
-    let {searching, searched, data, error} = this.state;
+    let {searching, searched} = this.state;
 
-    if (searched !== this.cachedSearch) {
+    if (!this.searchResult.has(searched)) {
       this.reload();
       return <Spin />;
     }
-    if (error) {
-      return <Alert message={error} type="error" showIcon />;
-    }
+    let data = this.searchResult.get(searched);
     if (!data) {
-      return null;
+      return <Spin />;
     }
+
+    if (typeof data === 'string') {
+      return <Alert message={data} type="error" showIcon />;
+    }
+
     return (
       <div>
         <Alert
@@ -86,17 +92,18 @@ export class UserView extends React.PureComponent<Props, State> {
   async reload() {
     let {host} = this.props;
     let {searched} = this.state;
-    this.cachedSearch = searched;
+    this.searchResult.set(searched, null);
     try {
       let result = (await Axios.get(`${host}/get?clan=${encodeURIComponent(searched)}`)).data;
       if (result) {
-        this.setState({data: result, error: null});
+        this.searchResult.set(searched, result);
       } else {
-        this.setState({error: '战队不存在', data: null});
+        this.searchResult.set(searched, '战队不存在');
       }
     } catch (e) {
-      this.setState({error: String(e), data: null});
+      this.searchResult.set(searched, String(e));
     }
+    this.forceUpdate();
   }
 
   renderTeam(data: any, team: TEAM) {

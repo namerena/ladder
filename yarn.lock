@@ -5768,10 +5768,10 @@ stealthy-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
   integrity sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=
 
-steno@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/steno/-/steno-0.5.0.tgz#d39fa388c7e7579e3f157495ec65c98cbbf70ae5"
-  integrity sha512-mWvMbYCGns7Fvj0ACjw8L4ZL+sDQSh2nMplMUt2fnHYVVPPaWSDAMLjv6IuMpjLwUhUWPpfzSNLpu+5ACkUyWA==
+steno@0.4.4:
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/steno/-/steno-0.4.4.tgz#071105bdfc286e6615c0403c27e9d7b5dcb855cb"
+  integrity sha1-BxEFvfwobmYVwEA8J+nXtdy4Vcs=
   dependencies:
     graceful-fs "^4.1.3"
 

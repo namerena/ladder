@@ -3,6 +3,7 @@ import {Input, Tabs} from 'antd';
 import {ChangeEvent, KeyboardEvent, SyntheticEvent} from 'react';
 import {RankView} from './rank-view';
 import {UserView} from './user-view';
+import {InputView} from './input-view';
 const {TabPane} = Tabs;
 
 interface State {
@@ -41,7 +42,7 @@ export class App extends React.PureComponent<any, any> {
             <UserView host={host} searched={searched} />
           </TabPane>
           <TabPane tab="登入" key="3">
-            Content of Tab Pane 2
+            <InputView host={host} />
           </TabPane>
         </Tabs>
       </>

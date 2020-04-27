@@ -129,22 +129,30 @@ export class Server {
   }
 
   updateUser(data: any) {
-    let {clan, names, password} = validateNameChange(data);
-    if (clan == null || names.length < 5) {
-      return '非法输入';
+    let validateResult = validateNameChange(data);
+    if (typeof validateResult === 'string') {
+      return validateResult;
     }
+
+    let {clan, names, password, create} = validateResult;
     password = crypto.createHash('sha256').update(password, 'utf8').digest('base64');
     let duplicate = new Set(names).size < 8;
     let user = this.users.get(clan);
     if (user) {
+      if (create) {
+        return '用户已存在';
+      }
       if (user.password !== password) {
         if (!user.password) {
           user.password = password;
         } else {
-          return '非法输入';
+          return '密码错误';
         }
       }
     } else {
+      if (!create) {
+        return '用户不存在';
+      }
       user = new User(clan);
       user.password = password;
       this.users.set(clan, user);
