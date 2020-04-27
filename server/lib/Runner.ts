@@ -21,7 +21,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     if (y >= 0 && y < len && x !== y) {
       let b = getBattle(x, y);
       if (!b) {
-        let b = new Battle(groups[x], groups[y], tstr);
+        b = new Battle(groups[x], groups[y], tstr);
         b.run();
         setBattle(x, y, b);
       }

@@ -4,6 +4,11 @@
 }
 .margin-v {
   margin: 12px 0;
+  width: 100%;
+  flex: 1;
+}
+.margin-v > pre {
+  width: 100%;
 }
 
 .table-main {
@@ -43,7 +48,7 @@
 }
 
 .rank-index {
-  width: 100px;
+  width: 20px;
   text-align: right;
   margin-right: 12px;
 }
@@ -60,4 +65,10 @@
   width: 30%;
   text-align: right;
   flex-shrink: 0;
+}
+
+.br-float-button {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
 }

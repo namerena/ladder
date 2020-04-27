@@ -18,6 +18,7 @@ interface State {
   confirmPassword: string;
   create: boolean;
   error?: string;
+  namesPreview?: string;
 }
 export class InputView extends React.PureComponent<Props, State> {
   state: State = {clan: '', names: '', password: '', confirmPassword: '', create: true};
@@ -49,8 +50,26 @@ export class InputView extends React.PureComponent<Props, State> {
       this.setState({error: String(e)});
     }
   };
+  changeNames = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    let names = e.target.value.trim();
+    let namesplit = names.split('\n');
+
+    let namesPreview;
+    if (namesplit.length >= 5) {
+      namesPreview = `1人组:
+  ${namesplit[0]}
+
+2人组:
+  ${namesplit[1]}
+  ${namesplit[2]}
+  
+5人组:
+  ${namesplit.slice(namesplit.length - 5).join('\n  ')}`;
+    }
+    this.setState({names, namesPreview});
+  };
   render(): React.ReactNode {
-    let {create, error} = this.state;
+    let {create, error, namesPreview} = this.state;
     return (
       <div>
         <div className="horizontal margin-v">
@@ -83,7 +102,7 @@ export class InputView extends React.PureComponent<Props, State> {
           <TextArea
             rows={8}
             placeholder={'最少输入5行名字\n\n战队和名字不可以包括以下字符：\n+ @ \\ / ? % * " | : < >'}
-            onChange={(e) => this.setState({names: e.target.value})}
+            onChange={this.changeNames}
           />
         </div>
         {error ? <Alert message={error} type={error === '提交成功' ? 'success' : 'error'} showIcon /> : null}
@@ -92,6 +111,12 @@ export class InputView extends React.PureComponent<Props, State> {
           <Button type="primary" onClick={this.onSubmit}>
             提交
           </Button>
+        </div>
+        <div className="horizontal margin-v">
+          <div className="form-label" />
+          <pre>
+            {namesPreview}
+          </pre>
         </div>
       </div>
     );
