@@ -79,7 +79,7 @@ export class RankView extends React.PureComponent<Props, State> {
           </div>
         </div>
         <div>服务器状态：</div>
-        <div>{ranks.lastMessage}</div>
+        <pre>{ranks.lastMessages.join('\n')}</pre>
       </>
     );
   }

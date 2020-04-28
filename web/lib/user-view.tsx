@@ -171,6 +171,7 @@ export class UserView extends React.PureComponent<Props, State> {
           delete data.clan;
           let keys = Object.keys(data);
           keys.sort();
+          keys.reverse();
           for (let key of keys) {
             let timeRecord = data[key];
             let timeNames: string = timeRecord.names;
@@ -191,7 +192,7 @@ export class UserView extends React.PureComponent<Props, State> {
             }
             cards.push(
               <Card key={key} size="small" title={key}>
-                <div>排名：{timeRecord.rank}</div>
+                <div>排名：{timeRecord.rank + 1}</div>
                 <div>出场：{timeNames.split('\n').join()}</div>
                 {battles}
               </Card>
@@ -241,7 +242,7 @@ function HistoryButton(props: {
   return (
     <div className="horizontal history-label">
       <a target="_blank" href={`//www.deepmess.com/namerena/#n=${base64}`} title="回放" className="battle-icon">
-        {win ? '✔' : '❌'}对手：{c1} ( {n1.split('\n').join()} ) 排名：{rank1}
+        {win ? '✔' : '❌'}对手：{c1} ( {n1.split('\n').join()} ) 排名：{rank1 + 1}
       </a>
     </div>
   );

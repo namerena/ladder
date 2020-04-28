@@ -105,8 +105,14 @@ export class Server {
   }
 
   indexPage: Buffer;
+
+  lastMessages: string[] = [];
   updateIndexPage(lastMessage: string) {
-    let result: any = {lastMessage};
+    while (this.lastMessages.length > 6) {
+      this.lastMessages.shift();
+    }
+    this.lastMessages.push(lastMessage);
+    let result: any = {lastMessages: this.lastMessages};
     for (let t of TEAMS) {
       let groups = this.games[t].groups;
       let topN = Math.min(groups.length, 100);

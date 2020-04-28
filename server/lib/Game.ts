@@ -57,6 +57,7 @@ export class Group {
 
 export class GroupSnapshot {
   rank: number;
+  score:number;
   clan: string;
   names: string;
   user: User;
@@ -66,6 +67,7 @@ export class GroupSnapshot {
     this.user = origin.user;
     this.clan = origin.user.clan;
     this.rank = origin.rank;
+    this.score = origin.score;
     this.names = origin.names;
     origin.addHistory(tstr, this);
   }

@@ -61,6 +61,9 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   // 计算积分
   for (let i = 0; i < len; ++i) {
     let group = groups[i];
+    // 每回合积分损耗
+    group.origin.score *= 0.99;
+
     let clan = group.user.clan;
     let encounters = battles.get(i);
 
@@ -79,12 +82,11 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       }
     }
     let encounterSize = encounters.size;
-    if (meetDown > meetUp) {
-      // 若和低排名对手对战太多，那么自动补充50%胜率的虚拟高排名对战，防止冠军积分过快增长
-      encounterSize += (meetDown - meetUp) / 2;
+
+    group.origin.score -= (encounterSize * (len - group.rank)) >> 1;
+    if (group.origin.score < 0) {
+      group.origin.score = Math.random();
     }
-    // 每回合积分减少，
-    group.origin.score *= (256 - encounterSize) / 256;
 
     if (winCount > 6 && group.rank > 100) {
       let j = i - 8;
@@ -92,7 +94,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       while (j >= 0) {
         let battle = await createBattle(i, j);
         if (battle != null && battle.winner === clan) {
-          group.origin.score += len + 16 - j;
+          group.origin.score += (len - j) >> 1;
           j -= 8;
         } else {
           break;
