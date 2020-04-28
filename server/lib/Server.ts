@@ -7,6 +7,8 @@ import {validateNameChange} from './validator';
 import * as zlib from 'zlib';
 
 export class Server {
+  requestCount = 0;
+
   users = new Map<string, User>();
   games = {'1': new Game(), '2': new Game(), '5': new Game()};
 
@@ -91,7 +93,11 @@ export class Server {
     }
 
     let endTime = new Date().getTime();
-    this.updateIndexPage(`${startTstr} : ${team}人组对战${Battle.counter}场，持续${(endTime - startTime) / 1000}秒`);
+    this.updateIndexPage(
+      `${startTstr} : ${team}人组对战${Battle.counter}场，耗时${(endTime - startTime) / 1000}秒，最近收到${
+        this.requestCount
+      }个请求`
+    );
     Battle.counter = 0;
     if (endTime - startTime >= TenMinutes) {
       this.start(0);
@@ -135,6 +141,7 @@ export class Server {
   }
 
   updateUser(data: any) {
+    ++this.requestCount;
     let validateResult = validateNameChange(data);
     if (typeof validateResult === 'string') {
       return validateResult;
@@ -179,6 +186,7 @@ export class Server {
   }
 
   getUser(clan: string) {
+    ++this.requestCount;
     let user = this.users.get(clan);
     if (user) {
       let result: any = {clan, lastChangeTime: user.lastChangeTime, changes: user.changes};
@@ -199,6 +207,7 @@ export class Server {
     return '';
   }
   getUserHistory(clan: string, team: TEAM) {
+    ++this.requestCount;
     let user = this.users.get(clan);
     if (user) {
       let group = user.groups[team];

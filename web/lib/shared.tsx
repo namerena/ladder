@@ -20,7 +20,7 @@ export function RankButton(props: {c: string; n: string; s: number; label?: stri
       <div className="clan-name" title={`积分：${s}`} onClick={nameClicked}>
         {label}
       </div>
-      <a target="_blank" href={`//www.deepmess.com/namerena/#n=${base64}`} title="挑战" className="battle-icon">
+      <a target="_blank" href={`https://deepmess.com/namerena/#n=${base64}`} title="挑战" className="battle-icon">
         ⚔
       </a>
     </div>

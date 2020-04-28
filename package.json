@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "server": "ts-node server/index.ts",
-    "web": "parcel web/index.html --open --out-dir temp --no-source-maps",
-    "build": "parcel build web/index.html --out-dir docs --no-source-maps --public-url ./ --no-content-hash"
+    "web": "parcel web/ladder.html --open --out-dir temp --no-source-maps",
+    "build": "parcel build web/ladder.html --out-dir build --no-source-maps --public-url ./ --no-content-hash"
   },
   "repository": {
     "type": "git",
