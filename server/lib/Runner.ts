@@ -77,13 +77,13 @@ export async function roundRun(game: Game, time: number, tstr: string) {
         meetDown++;
       }
       if (battle.winner === clan) {
-        group.origin.score += len + 16 - j;
+        group.origin.score += len + 100 - j;
         ++winCount;
       }
     }
     let encounterSize = encounters.size;
 
-    group.origin.score -= (encounterSize * (len - group.rank)) >> 1;
+    group.origin.score -= encounterSize * (len + 100 - group.rank) * 0.48 - 48;
     if (group.origin.score < 0) {
       group.origin.score = Math.random();
     }

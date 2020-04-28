@@ -4,13 +4,13 @@ import {Server} from './lib/Server';
 import {FileStorage} from './lib/Storage';
 import Cors from 'cors';
 import bodyParser from 'body-parser';
-import {TEAMS} from './lib/util';
+import {getUTC8Str, TEAMS, TenMinutes} from './lib/util';
 
 async function main() {
   let mainStorage = new FileStorage('./storage');
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
-  server.updateIndexPage('');
+  server.updateIndexPage(`${getUTC8Str(new Date().getTime(), 1)} ： 服务器重新启动`);
   server.start();
 
   let app = Express();

@@ -112,7 +112,7 @@ export class Server {
 
   indexPage: Buffer;
 
-  lastMessages: string[] = [`${getUTC8Str(new Date().getTime(), 1)} ： 服务器重新启动`];
+  lastMessages: string[] = [];
   updateIndexPage(lastMessage: string) {
     while (this.lastMessages.length > 36) {
       this.lastMessages.shift();

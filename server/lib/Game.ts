@@ -24,8 +24,8 @@ export class Battle {
 }
 
 export class Group {
-  // 新人注册就有2000分
-  score: number = 2000;
+  // 新人注册就有1000分
+  score: number = 1000;
   rank: number;
 
   history = new Map<string, GroupSnapshot>();
