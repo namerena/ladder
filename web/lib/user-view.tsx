@@ -242,7 +242,7 @@ function HistoryButton(props: {
   return (
     <div className="horizontal history-label">
       <a target="_blank" href={`https://deepmess.com/namerena/#n=${base64}`} title="回放" className="battle-icon">
-        {win ? '✔' : '❌'}对手：{c1} ( {n1.split('\n').join()} ) 排名：{rank1 + 1}
+        {win ? '✔️' : '❌'}对手：{c1} ( {n1.split('\n').join()} ) 排名：{rank1 + 1}
       </a>
     </div>
   );

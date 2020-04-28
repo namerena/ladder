@@ -21,7 +21,7 @@ export function RankButton(props: {c: string; n: string; s: number; label?: stri
         {label}
       </div>
       <a target="_blank" href={`https://deepmess.com/namerena/#n=${base64}`} title="挑战" className="battle-icon">
-        ⚔
+        ⚔️
       </a>
     </div>
   );
