@@ -149,7 +149,6 @@ export class Server {
 
     let {clan, names, password, create} = validateResult;
     password = crypto.createHash('sha256').update(password, 'utf8').digest('base64');
-    let duplicate = new Set(names).size < 8;
     let user = this.users.get(clan);
     if (user) {
       if (create) {
@@ -177,7 +176,6 @@ export class Server {
 
     user.changes++;
     user.lastChangeTime = new Date().getTime();
-    user.duplicate = duplicate;
     user.groups['1'].names = names[0];
     user.groups['2'].names = `${names[1]}\n${names[2]}`;
     user.groups['5'].names = names.slice(names.length - 5).join('\n');

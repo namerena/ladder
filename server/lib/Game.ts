@@ -76,7 +76,6 @@ export class GroupSnapshot {
 export class User {
   lastChangeTime: number;
   password: string;
-  duplicate: boolean;
   changes = 0;
 
   groups = {'1': new Group(this), '2': new Group(this), '5': new Group(this)};
@@ -86,7 +85,6 @@ export class User {
   load(data: any) {
     this.password = data.password;
     this.lastChangeTime = data.lastChangeTime;
-    this.duplicate = data.duplicate;
     this.changes = data.changes;
     this.groups['1'].load(data['1']);
     this.groups['2'].load(data['2']);
@@ -97,7 +95,6 @@ export class User {
     return {
       'password': this.password,
       'lastChangeTime': this.lastChangeTime,
-      'duplicate': this.duplicate,
       'changes': this.changes,
       '1': this.groups['1'].save(),
       '2': this.groups['2'].save(),
