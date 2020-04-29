@@ -40,7 +40,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       // 最近一次改名超过30天。减少对战次数
       tense = 1;
     }
-    for (let t = 1; i <= tense; ++i) {
+    for (let t = 1; t <= tense; ++t) {
       await createBattle(i, i - t);
       await createBattle(i, i + t);
     }
