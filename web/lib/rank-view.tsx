@@ -89,9 +89,46 @@ export class RankView extends React.PureComponent<Props, State> {
     this.cachedHost = host;
     try {
       let result = (await Axios.get(`${host}/index`)).data;
+      this.analyzeNames(result);
       this.setState({ranks: result, error: null});
     } catch (e) {
       this.setState({error: String(e), ranks: null});
     }
   }
+
+  // 给名字上色
+  analyzeNames(ranks: any) {
+    if (!ranks) {
+      return;
+    }
+    // 统计名字
+    let names = new Map<string, string[]>();
+    let bonus = new Map<string, number>();
+
+    for (let t of TEAMS) {
+      for (let data of ranks[t]) {
+        let {c, n} = data;
+        let nameList = names.get(c) || [];
+        names.set(c, nameList.concat((n as string).split('\n')));
+      }
+    }
+    for (let [key, nameList] of names) {
+      if (nameList.length === 8) {
+        let nameSet = new Set(nameList);
+        if (nameSet.size > 5) {
+          bonus.set(key, nameSet.size);
+        }
+      }
+    }
+    for (let t of TEAMS) {
+      for (let data of ranks[t]) {
+        let {c} = data;
+        if (bonus.has(c)) {
+          data['color'] = COLORS[bonus.get(c) - 6];
+        }
+      }
+    }
+  }
 }
+
+const COLORS = ['#a72', '#d50', '#f00'];
