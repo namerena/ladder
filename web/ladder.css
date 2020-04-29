@@ -42,6 +42,7 @@
 
 .clan-name {
   cursor: pointer;
+  white-space: nowrap;
 }
 .battle-icon {
   margin-left: 8px;

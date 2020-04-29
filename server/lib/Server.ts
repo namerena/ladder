@@ -10,7 +10,7 @@ export class Server {
   requestCount = 0;
 
   users = new Map<string, User>();
-  games = {'1': new Game(), '2': new Game(), '5': new Game()};
+  games = {'1': new Game(7), '2': new Game(5), '5': new Game(4)};
 
   constructor(public mainStorage: FileStorage, public logStorage: FileStorage) {
     this.load(mainStorage.init());
@@ -94,9 +94,9 @@ export class Server {
 
     let endTime = new Date().getTime();
     this.updateIndexPage(
-      `${startTstr} : ${team}人组对战${Battle.counter}场，耗时${(endTime - startTime) / 1000}秒，最近收到${
+      `${startTstr} : ${team}人组对战${Battle.counter}场，耗时${(endTime - startTime) / 1000}秒，累计处理${
         this.requestCount
-      }个请求`
+      }次查询`
     );
     Battle.counter = 0;
     if (endTime - startTime >= TenMinutes) {

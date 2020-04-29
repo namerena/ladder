@@ -57,7 +57,7 @@ export class Group {
 
 export class GroupSnapshot {
   rank: number;
-  score:number;
+  score: number;
   clan: string;
   names: string;
   user: User;
@@ -108,6 +108,13 @@ export class User {
 
 export class Game {
   groups: Group[];
-
   save() {}
+
+  rate: number;
+  fadeRate: number;
+
+  constructor(public tense: number) {
+    this.rate = (10 - tense) / 10;
+    this.fadeRate = 1 - this.rate * 0.01;
+  }
 }

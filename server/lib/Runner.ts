@@ -2,6 +2,7 @@ import {Battle, Game, Group, GroupSnapshot} from './Game';
 import {TenMinutes, ThirtyDays, waitImmediate} from './util';
 
 export async function roundRun(game: Game, time: number, tstr: string) {
+  const {rate, fadeRate} = game;
   let groups: GroupSnapshot[] = game.groups.map((g: Group) => new GroupSnapshot(g, tstr));
 
   let len = groups.length;
@@ -34,25 +35,19 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   for (let i = 0; i < len; ++i) {
     let group = groups[i];
     let user = group.user;
+    let tense = game.tense;
     if (time - user.lastChangeTime > ThirtyDays) {
       // 最近一次改名超过30天。减少对战次数
-      await createBattle(i, i - 1);
-      await createBattle(i, i + 1);
-    } else {
-      await createBattle(i, i - 1);
-      await createBattle(i, i - 2);
-      await createBattle(i, i - 3);
-      await createBattle(i, i - 4);
-      if ((await createBattle(i, i + 4)) == null) {
-        // 使排名最后的新注册选手得到更多战斗机会
-        await createBattle(i, i - 5);
-        await createBattle(i, i - 6);
-        await createBattle(i, i - 7);
-        await createBattle(i, i - 8);
-      } else {
-        await createBattle(i, i + 1);
-        await createBattle(i, i + 2);
-        await createBattle(i, i + 3);
+      tense = 1;
+    }
+    for (let t = 1; i <= tense; ++i) {
+      await createBattle(i, i - t);
+      await createBattle(i, i + t);
+    }
+    for (let n = 0; n < 4; ++n) {
+      // 增加一场对战
+      if (await createBattle(i, i - tense - Math.ceil(Math.random() * 8))) {
+        break;
       }
     }
     // 防止锁死进程，允许http服务器返回数据
@@ -62,7 +57,8 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   for (let i = 0; i < len; ++i) {
     let group = groups[i];
     // 每回合积分损耗
-    group.origin.score *= 0.99;
+    group.origin.score *= fadeRate;
+    group.origin.score += (len - group.rank) * rate;
 
     let clan = group.user.clan;
     let encounters = battles.get(i);
@@ -76,25 +72,27 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       } else {
         meetDown++;
       }
+      let scoreChange = (len + 100 - j) * rate;
       if (battle.winner === clan) {
-        group.origin.score += len + 100 - j;
+        group.origin.score += scoreChange;
         ++winCount;
+      } else {
+        group.origin.score -= scoreChange;
       }
     }
-    let encounterSize = encounters.size;
-
-    group.origin.score -= encounterSize * (len + 100 - group.rank) * 0.48 - 48;
     if (group.origin.score < 0) {
       group.origin.score = Math.random();
     }
 
-    if (winCount > 6 && group.rank > 100) {
-      let j = i - 8;
+    let encounterSize = encounters.size;
+
+    if (winCount > encounterSize * 0.75 && group.rank > 100) {
+      let j = i - 16;
       // 100名一下如果连胜可以持续得到加分
       while (j >= 0) {
         let battle = await createBattle(i, j);
         if (battle != null && battle.winner === clan) {
-          group.origin.score += (len - j) >> 1;
+          group.origin.score += (len - j) * rate;
           j -= 8;
         } else {
           break;
