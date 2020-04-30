@@ -30,7 +30,11 @@ export function RankButton(props: {
         {label}
       </div>
       <a target="_blank" href={`https://deepmess.com/namerena/#n=${base64}`} title="挑战" className="battle-icon">
-        ⚔️
+        {c === 'Rinick' ? (
+          <img src="https://deepmess.com/namerena/namerena.png" style={{width: 20, height: 20}} />
+        ) : (
+          '⚔️'
+        )}
       </a>
     </div>
   );
