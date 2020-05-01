@@ -58,6 +58,7 @@
 
 .rank-name {
   cursor: pointer;
+  white-space: nowrap;
 }
 .rank-name-self {
   font-weight: bold;
