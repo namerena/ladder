@@ -192,7 +192,7 @@ export class UserView extends React.PureComponent<Props, State> {
             }
             cards.push(
               <Card key={key} size="small" title={key}>
-                <div>排名：{timeRecord.rank + 1}</div>
+                <div>排名：{timeRecord.rank + 1} , 积分：{timeRecord.score}</div>
                 <div>出场：{timeNames.split('\n').join()}</div>
                 {battles}
               </Card>

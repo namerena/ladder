@@ -18,20 +18,21 @@ export function RankButton(props: {
 
   let nameClicked = onSearch
     ? () => {
-        onSearch(c);
-      }
+      onSearch(c);
+    }
     : null;
 
   let style = {color};
 
   return (
     <div className="horizontal">
-      <div className="clan-name" title={`积分：${s}`} onClick={nameClicked} style={style}>
+      <div className="clan-name" onClick={nameClicked} style={style}>
         {label}
+        {s != null ? <div className="clan-score">{s}</div> : null}
       </div>
       <a target="_blank" href={`https://deepmess.com/namerena/#n=${base64}`} title="挑战" className="battle-icon">
         {c === 'Rinick' ? (
-          <img src="https://deepmess.com/namerena/namerena.png" style={{width: 20, height: 20}} />
+          <img src="https://deepmess.com/namerena/namerena.png" style={{width: 20, height: 20}}/>
         ) : (
           '⚔️'
         )}

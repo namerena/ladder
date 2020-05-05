@@ -56,12 +56,22 @@ export class RankView extends React.PureComponent<Props, State> {
     for (let t of TEAMS) {
       let nodes = rankNodes[t];
       for (let data of ranks[t]) {
+        if (nodes.length === 101) {
+          nodes.push(<div key='...'>...</div>);
+        }
         nodes.push(<RankButton key={data.c} onSearch={onSearch} {...data} />);
       }
     }
     let indexSize = Math.max(rankNodes['1'].length, rankNodes['2'].length, rankNodes['5'].length);
     for (let i = 1; i < indexSize; ++i) {
-      indexes.push(<div key={i}>{i}</div>);
+      if (i <= 100) {
+        indexes.push(<div key={i}>{i}</div>);
+      } else if (i > 101) {
+        indexes.push(<div key={i}>-{indexSize - i}</div>);
+      } else {
+        indexes.push(<div key='...'>...</div>);
+      }
+
     }
 
     return (

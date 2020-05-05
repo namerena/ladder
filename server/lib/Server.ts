@@ -15,6 +15,7 @@ export class Server {
   constructor(public mainStorage: FileStorage, public logStorage: FileStorage) {
     this.load(mainStorage.init());
   }
+
   load(data: Map<string, string>) {
     let gameData = new Map<string, any>();
     for (let [key, value] of data) {
@@ -32,7 +33,8 @@ export class Server {
           user.load(decoded);
           this.users.set(key, user);
         }
-      } catch (e) {}
+      } catch (e) {
+      }
     }
     for (let team of TEAMS) {
       if (gameData.has(`@${team}`)) {
@@ -47,6 +49,7 @@ export class Server {
       this.sortGame(team);
     }
   }
+
   sortGame(team: TEAM) {
     let entries = [...this.users.entries()];
     entries.sort(([, usera], [, userb]) => userb.groups[team].score - usera.groups[team].score);
@@ -58,6 +61,7 @@ export class Server {
       group.rank = i;
     }
   }
+
   saveScores(team: TEAM) {
     let groups = this.games[team].groups;
 
@@ -113,12 +117,13 @@ export class Server {
   indexPage: Buffer;
 
   lastMessages: string[] = [];
+
   updateIndexPage(lastMessage: string) {
     while (this.lastMessages.length > 36) {
       this.lastMessages.shift();
     }
     this.lastMessages.push(lastMessage);
-    let result: any = {lastMessages: this.lastMessages};
+    let result: any = {lastMessages: this.lastMessages, size: this.games['1'].groups.length};
     for (let t of TEAMS) {
       let groups = this.games[t].groups;
       let topN = Math.min(groups.length, 100);
@@ -130,6 +135,16 @@ export class Server {
           n: group.names,
           s: Math.round(group.score),
         });
+      }
+      if (groups.length > 110) {
+        for (let i = groups.length - 10; i < groups.length; ++i) {
+          let group = groups[i];
+          teams.push({
+            c: group.user.clan,
+            n: group.names,
+            s: Math.round(group.score),
+          });
+        }
       }
       result[t] = teams;
     }
@@ -191,10 +206,13 @@ export class Server {
       for (let t of TEAMS) {
         let group = user.groups[t];
         let ranks: any[] = [];
-        let tdata: any = {names: group.names, score: group.score, ranks};
+        let tdata: any = {names: group.names, score: Math.round(group.score), ranks};
         let rank = group.rank;
-        let r0 = Math.max(rank - 5, 0);
-        let r1 = Math.min(rank + 5, this.games[t].groups.length - 1);
+        let r0 = Math.max(rank - 10, 0);
+        let r1 = Math.min(rank + 10, this.games[t].groups.length - 1);
+        if (r0 === 0) {
+          r1 = Math.min(20, this.games[t].groups.length - 1);
+        }
         for (let i = r0; i <= r1; ++i) {
           ranks.push([i, this.games[t].groups[i].user.clan]);
         }
@@ -204,6 +222,7 @@ export class Server {
     }
     return '';
   }
+
   getUserHistory(clan: string, team: TEAM) {
     ++this.requestCount;
     let user = this.users.get(clan);
@@ -212,7 +231,7 @@ export class Server {
       let result: any = {clan};
       for (let [key, snapshot] of group.history) {
         let battles: any[] = [];
-        let snapshotData = {names: snapshot.names, rank: snapshot.rank, battles};
+        let snapshotData = {names: snapshot.names, rank: snapshot.rank, score: snapshot.score, battles};
         for (let battle of snapshot.battles) {
           let battleData: any = {};
           let targetGroup: GroupSnapshot;

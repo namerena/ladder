@@ -67,7 +67,7 @@ export class GroupSnapshot {
     this.user = origin.user;
     this.clan = origin.user.clan;
     this.rank = origin.rank;
-    this.score = origin.score;
+    this.score = Math.round(origin.score);
     this.names = origin.names;
     origin.addHistory(tstr, this);
   }

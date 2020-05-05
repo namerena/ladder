@@ -10,6 +10,18 @@ async function main() {
   let mainStorage = new FileStorage('./storage');
   let logStorage = new FileStorage('./log');
   let server = new Server(mainStorage, logStorage);
+
+  // let baseT = Math.random()* 1588126518602;
+  // for (let i = 0; i < 100; ++i) {
+  //   let ts = baseT + i * TenMinutes;
+  //   let tstr = getUTC8Str(ts);
+  //   await roundRun(server.games['1'], ts, tstr);
+  //   console.log(i);
+  // }
+  // server.sortGame('1');
+  // server.saveScores('1');
+  // return;
+
   server.updateIndexPage(`${getUTC8Str(new Date().getTime(), 1)} ： 服务器重新启动`);
   server.start();
 

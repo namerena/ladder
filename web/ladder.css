@@ -45,6 +45,13 @@
 .clan-name {
   cursor: pointer;
   white-space: nowrap;
+  position: relative;
+}
+.clan-score {
+  position: absolute;
+  top: -11px;
+  font-size: 10px;
+  color: #bbb;
 }
 .battle-icon {
   margin-left: 8px;

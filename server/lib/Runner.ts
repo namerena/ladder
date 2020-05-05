@@ -14,10 +14,12 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   function getBattle(x: number, y: number) {
     return battles.get(x).get(y);
   }
+
   function setBattle(x: number, y: number, b: Battle) {
     battles.get(x).set(y, b);
     battles.get(y).set(x, b);
   }
+
   async function createBattle(x: number, y: number) {
     if (y >= 0 && y < len && x !== y) {
       let b = getBattle(x, y);
@@ -41,12 +43,13 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       tense = 1;
     }
     for (let t = 1; t <= tense; ++t) {
-      await createBattle(i, i - t);
-      await createBattle(i, i + t);
+      if (!(await createBattle(i, i - t))) {
+        await createBattle(i, i + tense + Math.ceil(Math.random() * 8))
+      }
     }
     for (let n = 0; n < 4; ++n) {
       // 增加一场对战
-      if (await createBattle(i, i - tense - Math.ceil(Math.random() * 8))) {
+      if (await createBattle(i, i - tense - Math.ceil(Math.random() * 16))) {
         break;
       }
     }
@@ -58,30 +61,19 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     let group = groups[i];
     // 每回合积分损耗
     group.origin.score *= fadeRate;
-    group.origin.score += (len - group.rank) * rate;
+    group.origin.score += Math.max((len - group.rank), 100) * rate;
 
     let clan = group.user.clan;
     let encounters = battles.get(i);
 
     let winCount = 0;
-    let meetUp = 0;
-    let meetDown = 0;
     for (let [j, battle] of encounters) {
-      if (j < i) {
-        meetUp++;
-      } else {
-        meetDown++;
-      }
-      let scoreChange = (len + 100 - j) * rate;
       if (battle.winner === clan) {
-        group.origin.score += scoreChange;
+        group.origin.score += (len + 100 - j) * rate;
         ++winCount;
       } else {
-        group.origin.score -= scoreChange;
+        group.origin.score -= (len + 100 - i) * rate;
       }
-    }
-    if (group.origin.score < 0) {
-      group.origin.score = Math.random();
     }
 
     let encounterSize = encounters.size;
