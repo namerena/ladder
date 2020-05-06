@@ -61,7 +61,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     let group = groups[i];
     // 每回合积分损耗
     group.origin.score *= fadeRate;
-    group.origin.score += Math.max((len - group.rank), 100) * rate;
+    group.origin.score += Math.max((len - group.rank), 40) * rate;
 
     let clan = group.user.clan;
     let encounters = battles.get(i);

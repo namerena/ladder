@@ -49,7 +49,12 @@ export function validateNameChange(
   if (names.length < 5) {
     return '至少输入5行名字';
   }
-
+  if (names[1] === names[2]) {
+    return '2人组名字重复';
+  }
+  if (new Set(names.slice(names.length - 5)).size < 5) {
+    return '5人组名字重复';
+  }
   // 名字加上空格前缀，方便战队编组
   names = names.map((name: string) => ` ${name}`);
 
