@@ -31,13 +31,15 @@ export class Group {
   history = new Map<string, GroupSnapshot>();
   names: string;
 
-  constructor(public user: User) {}
+  constructor(public user: User) {
+  }
 
   save() {
     return {
       names: this.names,
     };
   }
+
   load(data: any) {
     this.names = data.names;
   }
@@ -63,6 +65,7 @@ export class GroupSnapshot {
   user: User;
 
   battles: Set<Battle> = new Set<Battle>();
+
   constructor(public origin: Group, tstr: string) {
     this.user = origin.user;
     this.clan = origin.user.clan;
@@ -80,7 +83,8 @@ export class User {
 
   groups = {'1': new Group(this), '2': new Group(this), '5': new Group(this)};
 
-  constructor(public clan: string) {}
+  constructor(public clan: string) {
+  }
 
   load(data: any) {
     this.password = data.password;
@@ -104,14 +108,19 @@ export class User {
 }
 
 export class Game {
-  groups: Group[];
-  save() {}
 
-  rate: number;
+  groups: Group[];
+  tense: number;
+  rate: number
   fadeRate: number;
 
-  constructor(public tense: number) {
-    this.rate = (10 - tense) / 10;
-    this.fadeRate = 1 - this.rate * 0.01;
+  save() {
+  }
+
+
+  constructor(public size: number) {
+    this.tense = [1, 7, 5, 1, 1, 4][size];
+    this.rate = [1, 0.35, 0.5, 1, 1, 0.6][size];
+    this.fadeRate = 1 - (10 - this.tense) / 1000;
   }
 }

@@ -28,12 +28,15 @@ export class App extends React.PureComponent<any, any> {
   };
   render(): React.ReactNode {
     let {host, searched, tab} = this.state;
+    let showHost = window.location.host.startsWith('localhost');
     return (
       <>
-        <div className="horizontal margin-v">
-          服务器地址：
-          <Input defaultValue={host} onPressEnter={this.onHostChange} />
-        </div>
+        {showHost ? (
+          <div className="horizontal margin-v">
+            服务器地址：
+            <Input defaultValue={host} onPressEnter={this.onHostChange} />
+          </div>
+        ) : null}
         <Tabs activeKey={tab} onChange={this.changeTab}>
           <TabPane tab="排名" key="1">
             <RankView host={host} onSearch={this.onSearch} />

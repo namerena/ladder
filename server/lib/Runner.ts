@@ -1,13 +1,41 @@
-import {Battle, Game, Group, GroupSnapshot} from './Game';
+import {Battle, Game, Group, GroupSnapshot, User} from './Game';
 import {TenMinutes, ThirtyDays, waitImmediate} from './util';
+
+const guardUser = new User('!');
+const guardGroup = new Group(guardUser);
 
 export async function roundRun(game: Game, time: number, tstr: string) {
   const {rate, fadeRate} = game;
   let groups: GroupSnapshot[] = game.groups.map((g: Group) => new GroupSnapshot(g, tstr));
 
+  let guardsGroup = new Map<number, GroupSnapshot>();
+
+  function getGroup(n: number) {
+    if (n >= 0 && n < groups.length) {
+      return groups[n];
+    }
+    let group = guardsGroup.get(n);
+    if (!group) {
+      group = new GroupSnapshot(guardGroup, tstr);
+      group.rank = -1;
+      group.score = 0;
+      let names: string[] = [];
+      for (let i = 0; i < game.size; ++i) {
+        names.push(
+          ` 侍卫${String.fromCharCode(65 + Math.floor(Math.random() * 26))} 天梯${Math.random()
+            .toString()
+            .substring(2, 6)}`
+        );
+      }
+      group.names = names.join('\n');
+      guardsGroup.set(n, group);
+    }
+    return group;
+  }
+
   let len = groups.length;
   let battles = new Map<number, Map<number, Battle>>();
-  for (let i = 0; i < len; ++i) {
+  for (let i = -game.tense; i < len; ++i) {
     battles.set(i, new Map<number, Battle>());
   }
 
@@ -21,10 +49,10 @@ export async function roundRun(game: Game, time: number, tstr: string) {
   }
 
   async function createBattle(x: number, y: number) {
-    if (y >= 0 && y < len && x !== y) {
+    if (y < len && x !== y) {
       let b = getBattle(x, y);
       if (!b) {
-        b = new Battle(groups[x], groups[y], tstr);
+        b = new Battle(groups[x], getGroup(y), tstr);
         b.run();
         setBattle(x, y, b);
       }
@@ -42,17 +70,12 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       // 最近一次改名超过30天。减少对战次数
       tense = 1;
     }
-    for (let t = 1; t <= tense; ++t) {
-      if (!(await createBattle(i, i - t))) {
-        await createBattle(i, i + tense + Math.ceil(Math.random() * 8))
-      }
+    for (let t = tense; t >= 1; --t) {
+      await createBattle(i, i - t);
     }
-    for (let n = 0; n < 4; ++n) {
-      // 增加一场对战
-      if (await createBattle(i, i - tense - Math.ceil(Math.random() * 16))) {
-        break;
-      }
-    }
+    // 增加一场对战
+    await createBattle(i, i + tense + Math.ceil(Math.random() * 16));
+
     // 防止锁死进程，允许http服务器返回数据
     await waitImmediate();
   }
@@ -61,7 +84,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
     let group = groups[i];
     // 每回合积分损耗
     group.origin.score *= fadeRate;
-    group.origin.score += Math.max((len - group.rank), 40) * rate;
+    group.origin.score += Math.max(len - group.rank, 40) * rate;
 
     let clan = group.user.clan;
     let encounters = battles.get(i);

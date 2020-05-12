@@ -10,7 +10,7 @@ export class Server {
   requestCount = 0;
 
   users = new Map<string, User>();
-  games = {'1': new Game(7), '2': new Game(5), '5': new Game(4)};
+  games = {'1': new Game(1), '2': new Game(2), '5': new Game(5)};
 
   constructor(public mainStorage: FileStorage, public logStorage: FileStorage) {
     this.load(mainStorage.init());
@@ -33,8 +33,7 @@ export class Server {
           user.load(decoded);
           this.users.set(key, user);
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     for (let team of TEAMS) {
       if (gameData.has(`@${team}`)) {
