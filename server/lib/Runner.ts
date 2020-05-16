@@ -4,6 +4,8 @@ import {TenMinutes, ThirtyDays, waitImmediate} from './util';
 const guardUser = new User('!');
 const guardGroup = new Group(guardUser);
 
+const stars = "角亢氐房心尾箕斗牛女虚危室壁奎娄胃昴毕觜参井鬼柳星张翼轸".split('');
+
 export async function roundRun(game: Game, time: number, tstr: string) {
   const {rate, fadeRate} = game;
   let groups: GroupSnapshot[] = game.groups.map((g: Group) => new GroupSnapshot(g, tstr));
@@ -22,9 +24,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       let names: string[] = [];
       for (let i = 0; i < game.size; ++i) {
         names.push(
-          ` 侍卫${String.fromCharCode(65 + Math.floor(Math.random() * 26))} 天梯${Math.random()
-            .toString()
-            .substring(2, 6)}`
+          ` ${stars[Math.floor(Math.random() * 28)]}宿${String.fromCharCode(Math.floor(Math.random() * 0x51B0) + 0x4E00)}`
         );
       }
       group.names = names.join('\n');
@@ -50,6 +50,9 @@ export async function roundRun(game: Game, time: number, tstr: string) {
 
   async function createBattle(x: number, y: number) {
     if (y < len && x !== y) {
+      if (y < -game.tense) {
+        y = y % game.tense - 1;
+      }
       let b = getBattle(x, y);
       if (!b) {
         b = new Battle(groups[x], getGroup(y), tstr);
@@ -71,10 +74,9 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       tense = 1;
     }
     for (let t = tense; t >= 1; --t) {
-      await createBattle(i, i - t);
+      await createBattle(i, i - Math.ceil(Math.random() * t * 2));
+      await createBattle(i, i + t);
     }
-    // 增加一场对战
-    await createBattle(i, i + tense + Math.ceil(Math.random() * 16));
 
     // 防止锁死进程，允许http服务器返回数据
     await waitImmediate();

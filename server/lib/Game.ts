@@ -120,7 +120,7 @@ export class Game {
 
   constructor(public size: number) {
     this.tense = [1, 7, 5, 1, 1, 4][size];
-    this.rate = [1, 0.35, 0.5, 1, 1, 0.6][size];
+    this.rate = [1, 0.33, 0.5, 1, 1, 0.6][size];
     this.fadeRate = 1 - (10 - this.tense) / 1000;
   }
 }
