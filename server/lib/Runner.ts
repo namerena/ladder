@@ -74,7 +74,7 @@ export async function roundRun(game: Game, time: number, tstr: string) {
       tense = 1;
     }
     for (let t = tense; t >= 1; --t) {
-      await createBattle(i, i - Math.ceil(Math.random() * t * 2));
+      await createBattle(i, i - Math.ceil(Math.random() * (t + 8)));
       await createBattle(i, i + t);
     }
 
