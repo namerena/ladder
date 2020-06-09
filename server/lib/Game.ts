@@ -31,8 +31,7 @@ export class Group {
   history = new Map<string, GroupSnapshot>();
   names: string;
 
-  constructor(public user: User) {
-  }
+  constructor(public user: User) {}
 
   save() {
     return {
@@ -41,7 +40,7 @@ export class Group {
   }
 
   load(data: any) {
-    this.names = data.names;
+    this.names = data?.names || '';
   }
 
   addHistory(tstr: string, snapshot: GroupSnapshot) {
@@ -81,17 +80,26 @@ export class User {
   password: string;
   changes = 0;
 
-  groups = {'1': new Group(this), '2': new Group(this), '5': new Group(this)};
+  groups = {
+    '1a': new Group(this),
+    '1b': new Group(this),
+    '2': new Group(this),
+    '3': new Group(this),
+    '4': new Group(this),
+    '5': new Group(this),
+  };
 
-  constructor(public clan: string) {
-  }
+  constructor(public clan: string) {}
 
   load(data: any) {
     this.password = data.password;
     this.lastChangeTime = data.lastChangeTime;
     this.changes = data.changes;
-    this.groups['1'].load(data['1']);
+    this.groups['1a'].load(data['1a'] || data['1']);
+    this.groups['1b'].load(data['1b']);
     this.groups['2'].load(data['2']);
+    this.groups['3'].load(data['3']);
+    this.groups['4'].load(data['4']);
     this.groups['5'].load(data['5']);
   }
 
@@ -100,27 +108,27 @@ export class User {
       'password': this.password,
       'lastChangeTime': this.lastChangeTime,
       'changes': this.changes,
-      '1': this.groups['1'].save(),
+      '1a': this.groups['1a'].save(),
+      '1b': this.groups['1b'].save(),
       '2': this.groups['2'].save(),
+      '3': this.groups['3'].save(),
+      '4': this.groups['4'].save(),
       '5': this.groups['5'].save(),
     };
   }
 }
 
 export class Game {
-
   groups: Group[];
   tense: number;
-  rate: number
+  rate: number;
   fadeRate: number;
 
-  save() {
-  }
-
+  save() {}
 
   constructor(public size: number) {
-    this.tense = [1, 7, 5, 1, 1, 4][size];
-    this.rate = [1, 0.33, 0.5, 1, 1, 0.6][size];
+    this.tense = [7, 7, 5, 5, 4, 4][size];
+    this.rate = [0.33, 0.33, 0.5, 0.5, 0.6, 0.6][size];
     this.fadeRate = 1 - (10 - this.tense) / 1000;
   }
 }

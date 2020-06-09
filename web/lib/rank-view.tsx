@@ -37,14 +37,29 @@ export class RankView extends React.PureComponent<Props, State> {
       </span>,
     ];
     let rankNodes: {[key: string]: React.ReactNode[]} = {
-      '1': [
+      '1a': [
         <span key="head" className="table-header">
-          1人组
+          1人组A
+        </span>,
+      ],
+      '1b': [
+        <span key="head" className="table-header">
+          1人组B
         </span>,
       ],
       '2': [
         <span key="head" className="table-header">
           2人组
+        </span>,
+      ],
+      '3': [
+        <span key="head" className="table-header">
+          3人组
+        </span>,
+      ],
+      '4': [
+        <span key="head" className="table-header">
+          4人组
         </span>,
       ],
       '5': [
@@ -57,21 +72,27 @@ export class RankView extends React.PureComponent<Props, State> {
       let nodes = rankNodes[t];
       for (let data of ranks[t]) {
         if (nodes.length === 101) {
-          nodes.push(<div key='...'>...</div>);
+          nodes.push(<div key="...">...</div>);
         }
         nodes.push(<RankButton key={data.c} onSearch={onSearch} {...data} />);
       }
     }
-    let indexSize = Math.max(rankNodes['1'].length, rankNodes['2'].length, rankNodes['5'].length);
+    let indexSize = Math.max(
+      rankNodes['1a'].length,
+      rankNodes['1b'].length,
+      rankNodes['2'].length,
+      rankNodes['3'].length,
+      rankNodes['4'].length,
+      rankNodes['5'].length
+    );
     for (let i = 1; i < indexSize; ++i) {
       if (i <= 100) {
         indexes.push(<div key={i}>{i}</div>);
       } else if (i > 101) {
         indexes.push(<div key={i}>-{indexSize - i}</div>);
       } else {
-        indexes.push(<div key='...'>...</div>);
+        indexes.push(<div key="...">...</div>);
       }
-
     }
 
     return (
@@ -79,10 +100,19 @@ export class RankView extends React.PureComponent<Props, State> {
         <div className="table-main">
           <div className="table-column indxe-column">{indexes}</div>
           <div className="table-column" style={{flex: 1}}>
-            {rankNodes['1']}
+            {rankNodes['1a']}
+          </div>
+          <div className="table-column" style={{flex: 1}}>
+            {rankNodes['1b']}
           </div>
           <div className="table-column" style={{flex: 1}}>
             {rankNodes['2']}
+          </div>
+          <div className="table-column" style={{flex: 1}}>
+            {rankNodes['3']}
+          </div>
+          <div className="table-column" style={{flex: 1}}>
+            {rankNodes['4']}
           </div>
           <div className="table-column" style={{flex: 1}}>
             {rankNodes['5']}

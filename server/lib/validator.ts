@@ -21,7 +21,7 @@ function tooLong(str: string) {
 
 export function validateNameChange(
   data: any
-): {clan?: string; names?: string[]; password?: string; create?: boolean} | string {
+): {clan?: string; names?: string[][]; password?: string; create?: boolean} | string {
   if (!data || data.constructor !== Object) {
     return {};
   }
@@ -39,24 +39,35 @@ export function validateNameChange(
   if (clan.length === 0 || invalidClanChar.test(clan) || clan === '!' || tooLong(clan)) {
     return '输入战队名错误';
   }
-  let names = namestr.split('\n');
+  let names = namestr.split('\n').map((s: string) => s.trim());
   for (let name of names) {
-    name = name.trim();
-    if (name.length === 0 || tooLong(name) || invalidNameChar.test(name)) {
+    if (tooLong(name) || invalidNameChar.test(name)) {
       return `输入名字错误：${name}`;
     }
   }
-  if (names.length < 5) {
-    return '至少输入5行名字';
+  let uniqueNames = names.filter((s: string) => s.length);
+  let uniqueNameSet = new Set(uniqueNames);
+  if (uniqueNames.length !== uniqueNameSet.size) {
+    return '输入名字重复';
   }
-  if (names[1] === names[2]) {
-    return '2人组名字重复';
-  }
-  if (new Set(names.slice(names.length - 5)).size < 5) {
-    return '5人组名字重复';
-  }
-  // 名字加上空格前缀，方便战队编组
-  names = names.map((name: string) => ` ${name}`);
 
-  return {clan, names, password, create};
+  let output: string[][] = [];
+  const groupSizes = [1, 1, 2, 3, 4, 5];
+  let i = 0;
+  for (let gsize of groupSizes) {
+    let group: string[] = [];
+    for (let j = 0; j < gsize && i < names.length; ++i, ++j) {
+      let name = names[i];
+      if (name.length) {
+        // 名字加上空格前缀，方便战队编组
+        group.push(` ${name}`);
+      }
+    }
+    if (group.length === gsize) {
+      output.push(group);
+    } else {
+      output.push([]);
+    }
+  }
+  return {clan, names: output, password, create};
 }

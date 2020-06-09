@@ -88,8 +88,11 @@ export class UserView extends React.PureComponent<Props, State> {
           type="info"
         />
         <div className="horizontal" style={{alignItems: 'stretch'}}>
-          {this.renderTeam(data, '1')}
+          {this.renderTeam(data, '1a')}
+          {this.renderTeam(data, '1b')}
           {this.renderTeam(data, '2')}
+          {this.renderTeam(data, '3')}
+          {this.renderTeam(data, '4')}
           {this.renderTeam(data, '5')}
         </div>
         {this.renderHistory()}

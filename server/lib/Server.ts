@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import {Battle, Game, GroupSnapshot, User} from './Game';
 import {FileStorage} from './Storage';
-import {getUTC8Str, TEAM, TEAMS, TenMinutes} from './util';
+import {getUTC8Str, TEAM, TEAMS, FiveMinutes} from './util';
 import {roundRun} from './Runner';
 import {validateNameChange} from './validator';
 import * as zlib from 'zlib';
@@ -10,7 +10,14 @@ export class Server {
   requestCount = 0;
 
   users = new Map<string, User>();
-  games = {'1': new Game(1), '2': new Game(2), '5': new Game(5)};
+  games = {
+    '1a': new Game(1),
+    '1b': new Game(1),
+    '2': new Game(2),
+    '3': new Game(3),
+    '4': new Game(4),
+    '5': new Game(5),
+  };
 
   constructor(public mainStorage: FileStorage, public logStorage: FileStorage) {
     this.load(mainStorage.init());
@@ -50,7 +57,7 @@ export class Server {
   }
 
   sortGame(team: TEAM) {
-    let entries = [...this.users.entries()];
+    let entries = [...this.users.entries()].filter(([, user]) => user.groups[team].names);
     entries.sort(([, usera], [, userb]) => userb.groups[team].score - usera.groups[team].score);
     let groups = entries.map(([, user]) => user.groups[team]);
     this.games[team].groups = groups;
@@ -75,7 +82,7 @@ export class Server {
   start(delay: number = -1) {
     if (delay < 0) {
       let now = new Date().getTime();
-      let nextTs = Math.ceil((now + 1) / TenMinutes) * TenMinutes;
+      let nextTs = Math.ceil((now + 1) / FiveMinutes) * FiveMinutes;
       delay = nextTs - now;
     }
 
@@ -85,8 +92,8 @@ export class Server {
   nextRound = async () => {
     let startTime = new Date().getTime();
     let startTstr = getUTC8Str(startTime);
-    let roundsIdx = Math.round(startTime / TenMinutes);
-    let team: TEAM = TEAMS[roundsIdx % 3];
+    let roundsIdx = Math.round(startTime / FiveMinutes);
+    let team: TEAM = TEAMS[roundsIdx % 6];
     try {
       await roundRun(this.games[team], startTime, startTstr);
       this.sortGame(team);
@@ -102,7 +109,7 @@ export class Server {
       }次查询`
     );
     Battle.counter = 0;
-    if (endTime - startTime >= TenMinutes) {
+    if (endTime - startTime >= FiveMinutes) {
       this.start(0);
     } else {
       this.start();
@@ -122,7 +129,7 @@ export class Server {
       this.lastMessages.shift();
     }
     this.lastMessages.push(lastMessage);
-    let result: any = {lastMessages: this.lastMessages, size: this.games['1'].groups.length};
+    let result: any = {lastMessages: this.lastMessages, size: this.users.size};
     for (let t of TEAMS) {
       let groups = this.games[t].groups;
       let topN = Math.min(groups.length, 100);
@@ -182,17 +189,25 @@ export class Server {
       user = new User(clan);
       user.password = password;
       this.users.set(clan, user);
-      for (let t of TEAMS) {
-        user.groups[t].rank = this.users.size - 1;
-        this.games[t].groups.push(user.groups[t]);
-      }
     }
 
     user.changes++;
     user.lastChangeTime = new Date().getTime();
-    user.groups['1'].names = names[0];
-    user.groups['2'].names = `${names[1]}\n${names[2]}`;
-    user.groups['5'].names = names.slice(names.length - 5).join('\n');
+    for (let i = 0; i < TEAMS.length; ++i) {
+      let t = TEAMS[i];
+      let userGroup = user.groups[t];
+      userGroup.names = names[i].join('\n');
+      let gameGroups = this.games[t].groups;
+      if (userGroup.names) {
+        if (!gameGroups.includes(userGroup)) {
+          userGroup.rank = gameGroups.length;
+          gameGroups.push(user.groups[t]);
+        }
+      } else if (gameGroups.includes(userGroup)) {
+        gameGroups.splice(gameGroups.indexOf(userGroup), 1);
+      }
+    }
+
     this.mainStorage.saveFile(clan, JSON.stringify(user.save()));
     return '';
   }

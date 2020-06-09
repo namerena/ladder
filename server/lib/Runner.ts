@@ -1,5 +1,5 @@
 import {Battle, Game, Group, GroupSnapshot, User} from './Game';
-import {TenMinutes, ThirtyDays, waitImmediate} from './util';
+import {FiveMinutes, ThirtyDays, waitImmediate} from './util';
 
 const guardUser = new User('!');
 const guardGroup = new Group(guardUser);

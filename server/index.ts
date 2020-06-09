@@ -4,7 +4,7 @@ import {Server} from './lib/Server';
 import {FileStorage} from './lib/Storage';
 import Cors from 'cors';
 import bodyParser from 'body-parser';
-import {getUTC8Str, TEAMS, TenMinutes} from './lib/util';
+import {getUTC8Str, TEAMS, FiveMinutes} from './lib/util';
 
 async function main() {
   let mainStorage = new FileStorage('./storage');
@@ -12,10 +12,10 @@ async function main() {
   let server = new Server(mainStorage, logStorage);
 
   // let baseT = Math.random()* 1588126518602;
-  // for (let i = 0; i < 100; ++i) {
-  //   let ts = baseT + i * TenMinutes;
+  // for (let i = 0; i < 1; ++i) {
+  //   let ts = baseT + i * FiveMinutes;
   //   let tstr = getUTC8Str(ts);
-  //   await roundRun(server.games['1'], ts, tstr);
+  //   await roundRun(server.games['1a'], ts, tstr);
   //   console.log(i);
   // }
   // server.sortGame('1');

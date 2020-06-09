@@ -2,7 +2,7 @@ import * as React from 'react';
 import Axios from 'axios';
 import {Alert, Button, Card, Input, Spin, Radio} from 'antd';
 import {ChangeEvent} from 'react';
-import {getUTC8Str, TEAM} from '../../server/lib/util';
+import {getUTC8Str, TEAM, TEAMS} from '../../server/lib/util';
 import {validateNameChange} from '../../server/lib/validator';
 
 const TextArea = Input.TextArea;
@@ -51,22 +51,25 @@ export class InputView extends React.PureComponent<Props, State> {
     }
   };
   changeNames = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    let names = e.target.value.trim();
-    let namesplit = names.split('\n');
-
-    let namesPreview;
-    if (namesplit.length >= 5) {
-      namesPreview = `1人组:
-  ${namesplit[0]}
-
-2人组:
-  ${namesplit[1]}
-  ${namesplit[2]}
-  
-5人组:
-  ${namesplit.slice(namesplit.length - 5).join('\n  ')}`;
+    let names = e.target.value;
+    let namesPreview = '';
+    try {
+      let data = {clan: 'clan', names, password: '1234', create: true};
+      let result = validateNameChange(data);
+      if (typeof result === 'string') {
+        this.setState({error: result});
+        return;
+      }
+      let parsedNames = result.names;
+      for (let i = 0; i < TEAMS.length; ++i) {
+        let team = TEAMS[i];
+        namesPreview += `${team}人组：\n${parsedNames[i].join('\n')}\n\n`;
+      }
+    } catch (e) {
+      this.setState({error: String(e)});
     }
-    this.setState({names, namesPreview});
+
+    this.setState({names, namesPreview, error: null});
   };
   render(): React.ReactNode {
     let {create, error, namesPreview} = this.state;
@@ -100,8 +103,10 @@ export class InputView extends React.PureComponent<Props, State> {
         <div className="horizontal margin-v">
           <div className="form-label">名字：</div>
           <TextArea
-            rows={8}
-            placeholder={'最少输入5行名字\n\n战队和名字不可以包括以下字符：\n+ @ \\ / ? % * " | : < >'}
+            rows={16}
+            placeholder={
+              '每行输入一个名字\n\n名字会按输入位置自动分配到不同分组（参考下方提示）\n\n战队和名字不可以包括以下字符：\n+ @ \\ / ? % * " | : < >'
+            }
             onChange={this.changeNames}
           />
         </div>
@@ -114,9 +119,7 @@ export class InputView extends React.PureComponent<Props, State> {
         </div>
         <div className="horizontal margin-v">
           <div className="form-label" />
-          <pre>
-            {namesPreview}
-          </pre>
+          <pre>{namesPreview}</pre>
         </div>
       </div>
     );
