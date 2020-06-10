@@ -12,8 +12,7 @@ interface State {
   tab: string;
 }
 export class App extends React.PureComponent<any, any> {
-  //state: State = {host: 'http://ladder.deepmess.com', tab: '1'};
-  state: State = {host: 'http://localhost', tab: '1'};
+  state: State = {host: 'http://ladder.deepmess.com', tab: '1'};
   onHostChange = (e: KeyboardEvent<HTMLInputElement>) => {
     let host = (e.target as HTMLInputElement).value;
     if (!host.startsWith('http')) {

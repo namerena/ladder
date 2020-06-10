@@ -84,3 +84,14 @@
   right: 8px;
   bottom: 8px;
 }
+
+/* override deepmess style */
+
+.inner {
+  width: 1700px;
+  padding: 0 40px;
+}
+
+#main-content {
+  width: 1380px;
+}

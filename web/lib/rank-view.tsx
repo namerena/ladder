@@ -142,33 +142,39 @@ export class RankView extends React.PureComponent<Props, State> {
       return;
     }
     // 统计名字
-    let names = new Map<string, string[]>();
-    let bonus = new Map<string, number>();
+    let names = new Map<string, number>();
+    let ranksums = new Map<string, number>();
 
     for (let t of TEAMS) {
-      for (let data of ranks[t]) {
+      for (let i = 0; i < ranks[t].length; ++i) {
+        let data = ranks[t][i];
         let {c, n} = data;
-        let nameList = names.get(c) || [];
-        names.set(c, nameList.concat((n as string).split('\n')));
-      }
-    }
-    for (let [key, nameList] of names) {
-      if (nameList.length === 8) {
-        let nameSet = new Set(nameList);
-        if (nameSet.size > 5) {
-          bonus.set(key, nameSet.size);
+        let namecount = names.get(c) || 0;
+        namecount++;
+        names.set(c, namecount);
+
+        let ranksum = ranksums.get(c) || 0;
+        if (i < 100) {
+          ranksum += i;
+        } else {
+          ranksum += 109 - i;
         }
+        ranksums.set(c, ranksum);
       }
     }
     for (let t of TEAMS) {
       for (let data of ranks[t]) {
         let {c} = data;
-        if (bonus.has(c)) {
-          data['color'] = COLORS[bonus.get(c) - 6];
+        let nameCount = names.get(c);
+        if (nameCount === 6) {
+          let ranksum = ranksums.get(c);
+          if (ranksum < 255) {
+            data['color'] = `#${(255 - ranksum).toString(16).padStart(2, '0')}0000`;
+          }
         }
       }
     }
   }
 }
 
-const COLORS = ['#a72', '#d50', '#f00'];
+const COLORS = ['#d62', '#f00', '#f0f'];
