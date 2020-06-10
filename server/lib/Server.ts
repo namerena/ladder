@@ -205,6 +205,7 @@ export class Server {
         }
       } else if (gameGroups.includes(userGroup)) {
         gameGroups.splice(gameGroups.indexOf(userGroup), 1);
+        userGroup.score *= 0.9;
       }
     }
 
